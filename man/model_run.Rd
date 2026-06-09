@@ -2,16 +2,24 @@
 % Please edit documentation in R/model_run.R
 \name{model_run}
 \alias{model_run}
-\title{Run ACCEPT 3.0-CPRD prediction model}
+\title{Run ACCEPT prediction model}
 \usage{
-model_run(model_input)
+model_run(model_input, version = "accept3", country = NULL)
 }
 \arguments{
 \item{model_input}{A tibble of patients in the same format as accept::samplePatients}
+
+\item{version}{Which version to run. Options: "accept3" (default), "accept2", "accept1"}
+
+\item{country}{Three-letter ISO country code required for accept3.
+For UK primary care use "GBR-primary" (ACCEPT 3.0-CPRD).
+For UK specialty care use "GBR-specialty".
+Other supported countries: ARG, AUS, BRA, CAN, COL, DEU, DNK, ESP,
+FRA, ITA, JPN, KOR, MEX, NLD, NOR, SWE, USA.}
 }
 \value{
 A tibble with predicted exacerbation probabilities and rates
 }
 \description{
-Run ACCEPT 3.0-CPRD prediction model
+Run ACCEPT prediction model
 }

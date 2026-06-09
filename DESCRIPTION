@@ -1,11 +1,10 @@
-Package: accept3ukR
-Type: Package
-Title: ACCEPT 3.0-CPRD UK Primary Care COPD Exacerbation Prediction
+Package: acceptpexa
+Title: ACCEPT COPD Exacerbation Prediction Tool - ModelsCloud Wrapper
 Version: 0.1.0
 Authors@R: person("Jeenat", "Mehareen", email = "jeenatm@student.ubc.ca", role = c("aut", "cre"))
-Description: A wrapper package for ACCEPT 3.0-CPRD, a UK primary-care 
-    specific recalibration of ACCEPT 2.0 for predicting COPD exacerbations
-    using the Clinical Practice Research Datalink (CPRD).
+Description: A ModelsCloud wrapper for the ACCEPT package, providing COPD 
+    exacerbation risk predictions including ACCEPT 3.0-CPRD, a UK primary-care 
+    specific recalibration derived from the Clinical Practice Research Datalink.
 License: GPL-3
 Encoding: UTF-8
 Imports:

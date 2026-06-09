@@ -2,7 +2,7 @@
 % Please edit documentation in R/model_run.R
 \name{get_default_input}
 \alias{get_default_input}
-\title{Get default input for ACCEPT 3.0-CPRD}
+\title{Get default input for ACCEPT}
 \usage{
 get_default_input()
 }
@@ -10,5 +10,5 @@ get_default_input()
 A tibble with one default patient
 }
 \description{
-Get default input for ACCEPT 3.0-CPRD
+Get default input for ACCEPT
 }

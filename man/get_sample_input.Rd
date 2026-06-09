@@ -2,7 +2,7 @@
 % Please edit documentation in R/model_run.R
 \name{get_sample_input}
 \alias{get_sample_input}
-\title{Get sample input for ACCEPT 3.0-CPRD}
+\title{Get sample input for ACCEPT}
 \usage{
 get_sample_input(n = NULL)
 }
@@ -13,5 +13,5 @@ get_sample_input(n = NULL)
 A tibble of sample patients
 }
 \description{
-Get sample input for ACCEPT 3.0-CPRD
+Get sample input for ACCEPT
 }
