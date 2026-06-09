@@ -1,37 +1,43 @@
-# accept3ukR
+# acceptpexa
 
-An R package that provides UK primary-care specific COPD exacerbation risk predictions using ACCEPT 3.0-CPRD.
+A ModelsCloud wrapper for the ACCEPT package — ACute COPD Exacerbation Prediction Tool.
 
 ## Overview
 
-ACCEPT 3.0-CPRD is a recalibration of ACCEPT 2.0 derived from the CPRD (Clinical Practice Research Datalink) primary-care dataset. It applies optimism-corrected Cox-model recalibration parameters separately for moderate-to-severe and severe exacerbations.
+This package wraps the [resplab/accept](https://github.com/resplab/accept) package for deployment on the ModelsCloud platform. It supports all versions of ACCEPT including ACCEPT 3.0-CPRD, a UK primary-care specific recalibration derived from the Clinical Practice Research Datalink (CPRD).
 
-## Installation
+For direct use, install the main ACCEPT package instead:
 
 ```r
-remotes::install_github("resplab/accept3ukR")
+remotes::install_github("resplab/accept")
 ```
 
-## Usage
+## ModelsCloud Usage
 
 ```r
-library(accept3ukR)
+library(modelscloud)
+connect_to_model("resplab/acceptpexa", access_key = "YOUR_API_KEY")
 
-# Get sample patients
-patients <- get_sample_input()
+# UK primary care (ACCEPT 3.0-CPRD)
+result <- model_run(get_sample_input(), country = "GBR-primary")
 
-# Run prediction
-results <- model_run(patients)
-print(results)
+# UK specialty care
+result <- model_run(get_sample_input(), country = "GBR-specialty")
+
+# Other countries
+result <- model_run(get_sample_input(), country = "CAN")
+
+# ACCEPT 2
+result <- model_run(get_sample_input(), version = "accept2")
 ```
 
 ## Functions
 
-- `model_run()` — runs ACCEPT 3.0-CPRD predictions on a tibble of patients
+- `model_run(model_input, version, country)` — runs ACCEPT predictions
 - `get_sample_input()` — returns sample patient data
 - `get_default_input()` — returns a single default patient
 
 ## Related
 
-- [resplab/accept](https://github.com/resplab/accept) — the main ACCEPT package
+- [resplab/accept](https://github.com/resplab/accept) — main ACCEPT package
 - [resplab/accept3_UK](https://github.com/resplab/accept3_UK) — manuscript analysis code
