@@ -3,8 +3,7 @@ Title: ACCEPT COPD Exacerbation Prediction Tool - ModelsCloud Wrapper
 Version: 0.1.0
 Authors@R: person("Jeenat", "Mehareen", email = "jeenatm@student.ubc.ca", role = c("aut", "cre"))
 Description: A ModelsCloud wrapper for the ACCEPT package, providing COPD 
-    exacerbation risk predictions including ACCEPT 3.0-CPRD, a UK primary-care 
-    specific recalibration derived from the Clinical Practice Research Datalink.
+    exacerbation risk predictions.
 License: GPL-3
 Encoding: UTF-8
 Imports:
