@@ -2,18 +2,17 @@
 % Please edit documentation in R/model_run.R
 \name{echo}
 \alias{echo}
-\title{Echo input back — for testing API connectivity and serialization}
+\title{Echo input back for testing API connectivity and serialization}
 \usage{
-echo(model_input = NULL)
+echo(...)
 }
 \arguments{
-\item{model_input}{Named list or data frame to echo back.
-If NULL, returns default sample patients.}
+\item{...}{Any arguments passed to the function}
 }
 \value{
-The input unchanged.
+A list with diagnostic information about the received input
 }
 \description{
-Returns the input unchanged. Useful for verifying that data is being
-correctly passed to and from the ModelsCloud server.
+Returns diagnostic information about what the server received.
+Use this to verify that data is being correctly passed to the server..
 }

@@ -49,18 +49,47 @@ get_default_input <- function() {
   accept::samplePatients[1, ]
 }
 
-#' Echo input back — for testing API connectivity and serialization
+#' Echo input back for testing API connectivity and serialization
 #'
-#' Returns the input unchanged. Useful for verifying that data is being
-#' correctly passed to and from the ModelsCloud server.
+#' Returns diagnostic information about what the server received.
+#' Use this to verify that data is being correctly passed to the server..
 #'
-#' @param model_input Named list or data frame to echo back.
-#'   If NULL, returns default sample patients.
-#' @return The input unchanged.
+#' @param ... Any arguments passed to the function
+#' @return A list with diagnostic information about the received input
 #' @export
-echo <- function(model_input = NULL) {
-  if (is.null(model_input)) {
-    model_input <- accept::samplePatients
+echo <- function(...) {
+  args <- list(...)
+
+  # If nothing passed, return a helpful message
+  if (length(args) == 0) {
+    return(list(
+      success = FALSE,
+      message = "No input received. Pass model_input to test serialization.",
+      example = "echo(model_input = accept::samplePatients)"
+    ))
   }
-  model_input
+
+  # Check if model_input was passed
+  if ("model_input" %in% names(args)) {
+    input <- args$model_input
+    return(list(
+      success   = TRUE,
+      timestamp = as.character(Sys.time()),
+      class     = class(input),
+      typeof    = typeof(input),
+      nrow      = if (is.data.frame(input)) nrow(input) else NULL,
+      ncol      = if (is.data.frame(input)) ncol(input) else NULL,
+      names     = names(input),
+      value     = input
+    ))
+  }
+
+  # Otherwise return whatever was passed
+  list(
+    success   = TRUE,
+    timestamp = as.character(Sys.time()),
+    argCount  = length(args),
+    argNames  = names(args),
+    args      = args
+  )
 }
