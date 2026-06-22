@@ -7,10 +7,10 @@
 get_sample_input(n = NULL)
 }
 \arguments{
-\item{n}{number of sample patients to return. Default returns all.}
+\item{n}{Optional. Number of sample patients to return. Default returns all.}
 }
 \value{
-A tibble of sample patients
+A data frame of sample patients in the format expected by model_run()
 }
 \description{
 Get sample input for ACCEPT

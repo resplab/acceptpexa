@@ -1,4 +1,4 @@
-#' # Valid predictor names
+# Valid predictor names
 .mandatory_vars <- c("ID", "age", "male", "FEV1",
                      "LastYrExacCount", "LastYrSevExacCount")
 .optional_vars  <- c("LABA", "oxygen", "ICS", "LAMA",
@@ -6,6 +6,7 @@
 .symptom_vars   <- c("mMRC", "SGRQ", "CAT")
 
 #' Run ACCEPT prediction model
+#'
 #' @param model_input Named list or data frame of patient inputs in the same
 #'   format as accept::samplePatients. If NULL, uses default sample patients.
 #' @param version Which version to run. Options: "accept2" (default),
@@ -30,7 +31,8 @@ model_run <- function(model_input = NULL, version = "accept2", country = NULL) {
 }
 
 #' Get sample input for ACCEPT
-#' @param n number of sample patients to return. Default returns all.
+#'
+#' @param n Optional. Number of sample patients to return. Default returns all.
 #' @return A data frame of sample patients in the format expected by model_run()
 #' @export
 get_sample_input <- function(n = NULL) {
@@ -40,8 +42,25 @@ get_sample_input <- function(n = NULL) {
 }
 
 #' Get default input for ACCEPT
+#'
 #' @return A data frame with one default patient
 #' @export
 get_default_input <- function() {
   accept::samplePatients[1, ]
+}
+
+#' Echo input back — for testing API connectivity and serialization
+#'
+#' Returns the input unchanged. Useful for verifying that data is being
+#' correctly passed to and from the ModelsCloud server.
+#'
+#' @param model_input Named list or data frame to echo back.
+#'   If NULL, returns default sample patients.
+#' @return The input unchanged.
+#' @export
+echo <- function(model_input = NULL) {
+  if (is.null(model_input)) {
+    model_input <- accept::samplePatients
+  }
+  model_input
 }

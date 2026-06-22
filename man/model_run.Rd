@@ -4,12 +4,16 @@
 \alias{model_run}
 \title{Run ACCEPT prediction model}
 \usage{
-model_run(model_input, version = "accept3", country = NULL)
+model_run(model_input = NULL, version = "accept2", country = NULL)
 }
 \arguments{
-\item{model_input}{A tibble of patients in the same format as accept::samplePatients}
+\item{model_input}{Named list or data frame of patient inputs in the same
+format as accept::samplePatients. If NULL, uses default sample patients.}
 
-\item{version}{Which version to run. Options: "accept3" (default), "accept2", "accept1"}
+\item{version}{Which version to run. Options: "accept2" (default),
+"accept3", "accept1". Note: accept2 requires all predictors to be present.
+Missing optional predictors are only auto-imputed when using
+version = "accept3" with country = "GBR-primary".}
 
 \item{country}{Three-letter ISO country code required for accept3.
 For UK primary care use "GBR-primary" (ACCEPT 3.0-CPRD).

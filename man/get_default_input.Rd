@@ -7,7 +7,7 @@
 get_default_input()
 }
 \value{
-A tibble with one default patient
+A data frame with one default patient
 }
 \description{
 Get default input for ACCEPT
