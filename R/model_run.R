@@ -7,26 +7,64 @@
 
 #' Run ACCEPT prediction model
 #'
-#' @param model_input Named list or data frame of patient inputs in the same
-#'   format as accept::samplePatients. If NULL, uses default sample patients.
-#' @param version Which version to run. Options: "accept2" (default),
-#'   "accept3", "accept1". Note: accept2 requires all predictors to be present.
-#'   Missing optional predictors are only auto-imputed when using
-#'   version = "accept3" with country = "GBR-primary".
-#' @param country Three-letter ISO country code required for accept3.
-#'   For UK primary care use "GBR-primary" (ACCEPT 3.0-CPRD).
-#'   For UK specialty care use "GBR-specialty".
-#'   Other supported countries: ARG, AUS, BRA, CAN, COL, DEU, DNK, ESP,
-#'   FRA, ITA, JPN, KOR, MEX, NLD, NOR, SWE, USA.
+#' @param ... Named arguments. Supported arguments:
+#'   \itemize{
+#'     \item \code{model_input} Named list or data frame of patient inputs.
+#'       If NULL, uses default sample patients.
+#'     \item \code{version} Which version to run: "accept2" (default),
+#'       "accept3", "accept1". Missing optional predictors are only
+#'       auto-imputed when using version = "accept3" with country = "GBR-primary".
+#'     \item \code{country} Required when version = "accept3".
+#'       For UK primary care use "GBR-primary" (ACCEPT 3.0-CPRD).
+#'       For UK specialty care use "GBR-specialty".
+#'       Other supported countries: ARG, AUS, BRA, CAN, COL, DEU, DNK,
+#'       ESP, FRA, ITA, JPN, KOR, MEX, NLD, NOR, SWE, USA.
+#'   }
 #' @return A tibble with predicted exacerbation probabilities and rates
 #' @export
-model_run <- function(model_input = NULL, version = "accept2", country = NULL) {
+model_run <- function(...) {
+  args <- list(...)
+
+  # Validate all arguments are named
+  if (!is.null(names(args)) && any(names(args) == "")) {
+    stop("All arguments must be named. e.g., model_run(model_input = patients, version = 'accept2')")
+  }
+
+  # Extract arguments with defaults
+  model_input <- if ("model_input" %in% names(args)) args[["model_input"]] else NULL
+  version     <- if ("version"     %in% names(args)) args[["version"]]     else "accept2"
+  country     <- if ("country"     %in% names(args)) args[["country"]]     else NULL
+
+  # Validate version
+  valid_versions <- c("accept1", "accept2", "accept3")
+  if (!version %in% valid_versions) {
+    stop(paste("Invalid version:", version,
+               "- must be one of:", paste(valid_versions, collapse = ", ")))
+  }
+
+  # Validate country required for accept3
+  if (version == "accept3" && is.null(country)) {
+    stop("'country' is required when version = 'accept3'. ",
+         "e.g., country = 'GBR-primary' or country = 'CAN'")
+  }
+
+  # Use default if no input provided
   if (is.null(model_input)) {
     model_input <- accept::samplePatients
   }
+
+  # Convert named list to data frame if needed
   if (is.list(model_input) && !is.data.frame(model_input)) {
     model_input <- as.data.frame(model_input)
   }
+
+  # Validate mandatory columns present
+  missing_cols <- setdiff(.mandatory_vars, names(model_input))
+  if (length(missing_cols) > 0) {
+    stop(paste("Missing required columns:",
+               paste(missing_cols, collapse = ", ")))
+  }
+
   accept::accept(newdata = model_input, version = version, country = country)
 }
 
@@ -52,7 +90,7 @@ get_default_input <- function() {
 #' Echo input back for testing API connectivity and serialization
 #'
 #' Returns diagnostic information about what the server received.
-#' Use this to verify that data is being correctly passed to the server..
+#' Use this to verify that data is being correctly passed to the server.
 #'
 #' @param ... Any arguments passed to the function
 #' @return A list with diagnostic information about the received input
@@ -60,7 +98,6 @@ get_default_input <- function() {
 echo <- function(...) {
   args <- list(...)
 
-  # If nothing passed, return a helpful message
   if (length(args) == 0) {
     return(list(
       success = FALSE,
@@ -69,7 +106,6 @@ echo <- function(...) {
     ))
   }
 
-  # Check if model_input was passed
   if ("model_input" %in% names(args)) {
     input <- args$model_input
     return(list(
@@ -84,7 +120,6 @@ echo <- function(...) {
     ))
   }
 
-  # Otherwise return whatever was passed
   list(
     success   = TRUE,
     timestamp = as.character(Sys.time()),
