@@ -53,9 +53,9 @@ model_run <- function(...) {
     model_input <- accept::samplePatients
   }
 
-  # Convert named list to data frame if needed
-  if (is.list(model_input) && !is.data.frame(model_input)) {
-    model_input <- as.data.frame(model_input)
+  # Convert to tibble — required by accept3_cprd and accept functions
+  if (!tibble::is_tibble(model_input)) {
+    model_input <- tibble::as_tibble(model_input)
   }
 
   # Validate mandatory columns present
