@@ -14,5 +14,5 @@ A list with diagnostic information about the received input
 }
 \description{
 Returns diagnostic information about what the server received.
-Use this to verify that data is being correctly passed to the server..
+Use this to verify that data is being correctly passed to the server.
 }

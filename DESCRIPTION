@@ -10,4 +10,4 @@ Imports:
     accept
 Remotes:
     resplab/accept
-RoxygenNote: 7.3.2
+Config/roxygen2/version: 8.0.0
