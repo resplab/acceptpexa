@@ -12,6 +12,9 @@ derived from the Clinical Practice Research Datalink (CPRD).
 **Default behaviour:** `model_run()` with no arguments runs **ACCEPT 2.0** on the built-in
 sample patients. ACCEPT 2.0 works universally — no country code is needed.
 
+> **Important:** All arguments to `model_run()` must be named.
+> Use `model_run(model_input = patients)`.
+
 ---
 
 ## Installation
@@ -40,25 +43,24 @@ library(acceptpexa)
 # Get sample patients
 patients <- get_sample_input()
 
-# ACCEPT 2.0 — default, no country needed, all patients
-model_run(patients)
-
-# ACCEPT 2.0 — single default patient
-model_run(get_default_input())
+# ACCEPT 2.0 — default, no country needed
+model_run()
+model_run(model_input = patients)
+model_run(model_input = get_default_input())
 
 # ACCEPT 3.0 — UK primary care (ACCEPT 3.0-CPRD)
 # Missing optional predictors are auto-imputed
-model_run(patients, version = "accept3", country = "GBR-primary")
+model_run(model_input = patients, version = "accept3", country = "GBR-primary")
 
 # ACCEPT 3.0 — UK specialty care
-model_run(patients, version = "accept3", country = "GBR-specialty")
+model_run(model_input = patients, version = "accept3", country = "GBR-specialty")
 
 # ACCEPT 3.0 — Other countries
-model_run(patients, version = "accept3", country = "CAN")
-model_run(patients, version = "accept3", country = "USA")
+model_run(model_input = patients, version = "accept3", country = "CAN")
+model_run(model_input = patients, version = "accept3", country = "USA")
 
 # ACCEPT 1.0
-model_run(patients, version = "accept1")
+model_run(model_input = patients, version = "accept1")
 ```
 
 ### Option 2 — Via ModelsCloud API
@@ -145,9 +147,10 @@ For all other versions, all predictors should be provided.
 
 | Function | Description |
 |---|---|
-| `model_run(model_input, version, country)` | Run ACCEPT predictions |
+| `model_run(...)` | Run ACCEPT predictions. All arguments must be named. |
 | `get_sample_input(n)` | Get sample patient data (optional: n patients) |
 | `get_default_input()` | Get a single default patient |
+| `echo(...)` | Echo input back — for testing API connectivity and serialization |
 
 ---
 
