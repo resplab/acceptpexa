@@ -7,8 +7,9 @@
 get_default_input()
 }
 \value{
-A data frame with one default patient
+A list with one default patient plus version and country fields
 }
 \description{
-Get default input for ACCEPT
+Returns a single default patient with default version and country fields
+included, ready to pass directly to model_run().
 }

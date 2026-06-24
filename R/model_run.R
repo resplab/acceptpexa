@@ -7,10 +7,13 @@
 
 #' Run ACCEPT prediction model
 #'
-#' @param ... Named arguments. Supported arguments:
+#' @param model_input A named list containing patient data plus optional
+#'   \code{version} and \code{country} fields. Patient data must match the
+#'   format of \code{accept::samplePatients}. If NULL, uses
+#'   \code{get_default_input()}.
+#'
+#'   Supported fields inside \code{model_input}:
 #'   \itemize{
-#'     \item \code{model_input} Named list or data frame of patient inputs.
-#'       If NULL, uses default sample patients.
 #'     \item \code{version} Which version to run: "accept2" (default),
 #'       "accept3", "accept1". Missing optional predictors are only
 #'       auto-imputed when using version = "accept3" with country = "GBR-primary".
@@ -22,18 +25,19 @@
 #'   }
 #' @return A tibble with predicted exacerbation probabilities and rates
 #' @export
-model_run <- function(...) {
-  args <- list(...)
+model_run <- function(model_input = NULL) {
 
-  # Validate all arguments are named
-  if (!is.null(names(args)) && any(names(args) == "")) {
-    stop("All arguments must be named. e.g., model_run(model_input = patients, version = 'accept2')")
+  # Use default if no input provided
+  if (is.null(model_input)) {
+    model_input <- get_default_input()
   }
 
-  # Extract arguments with defaults
-  model_input <- if ("model_input" %in% names(args)) args[["model_input"]] else NULL
-  version     <- if ("version"     %in% names(args)) args[["version"]]     else "accept2"
-  country     <- if ("country"     %in% names(args)) args[["country"]]     else NULL
+  # Extract version and country from model_input if present
+  version <- if ("version" %in% names(model_input)) model_input[["version"]] else "accept2"
+  country <- if ("country" %in% names(model_input)) model_input[["country"]] else NULL
+
+  # Remove version and country from patient data
+  patient_data <- model_input[!names(model_input) %in% c("version", "country")]
 
   # Validate version
   valid_versions <- c("accept1", "accept2", "accept3")
@@ -45,36 +49,24 @@ model_run <- function(...) {
   # Validate country required for accept3
   if (version == "accept3" && is.null(country)) {
     stop("'country' is required when version = 'accept3'. ",
-         "e.g., country = 'GBR-primary' or country = 'CAN'")
+         "e.g., add country = 'GBR-primary' to your model_input list.")
   }
 
-  # Use default if no input provided
-  if (is.null(model_input)) {
-    model_input <- accept::samplePatients
-  }
-
-  # Normalise to a plain data frame (handles named list, tibble, data.frame)
-  # OpenCPU deserialises incoming JSON into a plain R list, so we cannot rely
-  # on tibble being present.  Instead we coerce to data.frame here, then
-  # serialise to a JSON string and let accept::accept() parse it back via
-  # format = "json" — that is the only input path that does not hard-stop on
-  # non-tibble input inside accept::accept().
-  if (is.list(model_input) && !is.data.frame(model_input)) {
-    model_input <- as.data.frame(model_input, stringsAsFactors = FALSE)
+  # Convert to data frame if needed
+  if (is.list(patient_data) && !is.data.frame(patient_data)) {
+    patient_data <- as.data.frame(patient_data, stringsAsFactors = FALSE)
   }
 
   # Validate mandatory columns present
-  missing_cols <- setdiff(.mandatory_vars, names(model_input))
+  missing_cols <- setdiff(.mandatory_vars, names(patient_data))
   if (length(missing_cols) > 0) {
     stop(paste("Missing required columns:",
                paste(missing_cols, collapse = ", ")))
   }
 
-  # Serialise to JSON string — accept::accept(format = "json") calls
-  # jsonlite::fromJSON() internally, which reconstructs a proper tibble.
-  # This is the robust path that works regardless of whether tibble is
-  # attached in the server environment.
-  json_input <- jsonlite::toJSON(model_input, dataframe = "rows", auto_unbox = FALSE)
+  # Serialise to JSON — accept::accept(format = "json") reconstructs a proper
+  # tibble internally, which is required by accept3_cprd and other functions.
+  json_input <- jsonlite::toJSON(patient_data, dataframe = "rows", auto_unbox = FALSE)
 
   accept::accept(newdata = json_input, format = "json", version = version, country = country)
 }
@@ -92,10 +84,16 @@ get_sample_input <- function(n = NULL) {
 
 #' Get default input for ACCEPT
 #'
-#' @return A data frame with one default patient
+#' Returns a single default patient with default version and country fields
+#' included, ready to pass directly to model_run().
+#'
+#' @return A list with one default patient plus version and country fields
 #' @export
 get_default_input <- function() {
-  accept::samplePatients[1, ]
+  patient <- as.list(accept::samplePatients[1, ])
+  patient$version <- "accept2"
+  patient$country <- NULL
+  patient
 }
 
 #' Echo input back for testing API connectivity and serialization
@@ -113,7 +111,7 @@ echo <- function(...) {
     return(list(
       success = FALSE,
       message = "No input received. Pass model_input to test serialization.",
-      example = "echo(model_input = accept::samplePatients)"
+      example = "echo(model_input = get_default_input())"
     ))
   }
 

@@ -4,22 +4,25 @@
 \alias{model_run}
 \title{Run ACCEPT prediction model}
 \usage{
-model_run(...)
+model_run(model_input = NULL)
 }
 \arguments{
-\item{...}{Named arguments. Supported arguments:
-\itemize{
-  \item \code{model_input} Named list or data frame of patient inputs.
-    If NULL, uses default sample patients.
-  \item \code{version} Which version to run: "accept2" (default),
-    "accept3", "accept1". Missing optional predictors are only
-    auto-imputed when using version = "accept3" with country = "GBR-primary".
-  \item \code{country} Required when version = "accept3".
-    For UK primary care use "GBR-primary" (ACCEPT 3.0-CPRD).
-    For UK specialty care use "GBR-specialty".
-    Other supported countries: ARG, AUS, BRA, CAN, COL, DEU, DNK,
-    ESP, FRA, ITA, JPN, KOR, MEX, NLD, NOR, SWE, USA.
-}}
+\item{model_input}{A named list containing patient data plus optional
+  \code{version} and \code{country} fields. Patient data must match the
+  format of \code{accept::samplePatients}. If NULL, uses
+  \code{get_default_input()}.
+
+  Supported fields inside \code{model_input}:
+  \itemize{
+    \item \code{version} Which version to run: "accept2" (default),
+      "accept3", "accept1". Missing optional predictors are only
+      auto-imputed when using version = "accept3" with country = "GBR-primary".
+    \item \code{country} Required when version = "accept3".
+      For UK primary care use "GBR-primary" (ACCEPT 3.0-CPRD).
+      For UK specialty care use "GBR-specialty".
+      Other supported countries: ARG, AUS, BRA, CAN, COL, DEU, DNK,
+      ESP, FRA, ITA, JPN, KOR, MEX, NLD, NOR, SWE, USA.
+  }}
 }
 \value{
 A tibble with predicted exacerbation probabilities and rates
