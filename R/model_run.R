@@ -33,8 +33,8 @@ model_run <- function(model_input = NULL) {
   }
 
   # Extract version and country from model_input if present
-  version <- if ("version" %in% names(model_input)) model_input[["version"]] else "accept2"
-  country <- if ("country" %in% names(model_input)) model_input[["country"]] else NULL
+  version <- if ("version" %in% names(model_input)) model_input[["version"]][[1]] else "accept2"
+  country <- if ("country" %in% names(model_input)) model_input[["country"]][[1]] else NULL
 
   # Remove version and country from patient data
   patient_data <- model_input[!names(model_input) %in% c("version", "country")]

@@ -143,17 +143,24 @@ For UK: use `"GBR-primary"` (primary care) or `"GBR-specialty"` (specialty care)
 
 ---
 
-## Mandatory Predictors
+## Required Identifier
 
 | Variable | Description |
 |---|---|
-| `ID` | Patient identifier |
+| `ID` | Unique patient identifier — required to label output rows, but not a predictor |
+
+## Mandatory Predictors
+
+These columns go into the model calculation:
+
+| Variable | Description |
+|---|---|
 | `age` | Age in years |
 | `male` | TRUE/FALSE |
 | `FEV1` | FEV1 % predicted (10–120) |
 | `LastYrExacCount` | Total exacerbations last year |
 | `LastYrSevExacCount` | Severe exacerbations last year |
-| `mMRC` or `SGRQ` | Symptom score (at least one required) |
+| `mMRC` or `SGRQ` | Symptom score — at least one required. If only SGRQ is available it is converted to mMRC internally |
 
 ---
 
