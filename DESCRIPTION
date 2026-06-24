@@ -7,7 +7,9 @@ Description: A ModelsCloud wrapper for the ACCEPT package, providing COPD
 License: GPL-3
 Encoding: UTF-8
 Imports:
-    accept (>= 1.2.0)
+    accept (>= 1.2.0),
+    jsonlite
 Remotes:
     resplab/accept
+RoxygenNote: 7.3.2
 Config/roxygen2/version: 8.0.0

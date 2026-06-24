@@ -53,9 +53,14 @@ model_run <- function(...) {
     model_input <- accept::samplePatients
   }
 
-  # Convert to tibble — required by accept3_cprd and accept functions
-  if (!tibble::is_tibble(model_input)) {
-    model_input <- tibble::as_tibble(model_input)
+  # Normalise to a plain data frame (handles named list, tibble, data.frame)
+  # OpenCPU deserialises incoming JSON into a plain R list, so we cannot rely
+  # on tibble being present.  Instead we coerce to data.frame here, then
+  # serialise to a JSON string and let accept::accept() parse it back via
+  # format = "json" — that is the only input path that does not hard-stop on
+  # non-tibble input inside accept::accept().
+  if (is.list(model_input) && !is.data.frame(model_input)) {
+    model_input <- as.data.frame(model_input, stringsAsFactors = FALSE)
   }
 
   # Validate mandatory columns present
@@ -65,7 +70,13 @@ model_run <- function(...) {
                paste(missing_cols, collapse = ", ")))
   }
 
-  accept::accept(newdata = model_input, version = version, country = country)
+  # Serialise to JSON string — accept::accept(format = "json") calls
+  # jsonlite::fromJSON() internally, which reconstructs a proper tibble.
+  # This is the robust path that works regardless of whether tibble is
+  # attached in the server environment.
+  json_input <- jsonlite::toJSON(model_input, dataframe = "rows", auto_unbox = FALSE)
+
+  accept::accept(newdata = json_input, format = "json", version = version, country = country)
 }
 
 #' Get sample input for ACCEPT
