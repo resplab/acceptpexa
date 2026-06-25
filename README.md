@@ -23,7 +23,7 @@ looks identical to the client.
 
 ## Installation
 
-### Direct R usage (recommended for full functionality)
+### Direct R usage 
 
 ```r
 remotes::install_github("resplab/acceptpexa")
