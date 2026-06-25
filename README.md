@@ -37,100 +37,276 @@ remotes::install_github("resplab/modelscloud")
 
 ---
 
-## Usage
+## Quick Start
 
-### Option 1 — Direct R usage
+### Direct R usage (without ModelsCloud)
 
 ```r
+remotes::install_github("resplab/acceptpexa")
 library(acceptpexa)
 
-# Use default input (accept2, single patient)
+# Default — accept2, single patient
 model_run()
 
-# Get sample patients and run accept2 (default)
-mi <- get_sample_input()
-model_run(mi)
+# UK primary care
+model_run(list(
+  patients_data = accept::samplePatients,
+  version = "accept3",
+  country = "GBR-primary"
+))
 
-# UK primary care — ACCEPT 3.0-CPRD
-mi <- get_sample_input()
-mi$version <- "accept3"
-mi$country <- "GBR-primary"
-model_run(mi)
-
-# UK specialty care
-mi <- get_sample_input()
-mi$version <- "accept3"
-mi$country <- "GBR-specialty"
-model_run(mi)
-
-# Other countries
-mi <- get_sample_input()
-mi$version <- "accept3"
-mi$country <- "CAN"
-model_run(mi)
-
-# ACCEPT 1.0
-mi <- get_sample_input()
-mi$version <- "accept1"
-model_run(mi)
-
-# Missing optional predictors — auto-imputed for GBR-primary
-mi <- get_sample_input()
-mi$patients_data$BMI    <- NULL
-mi$patients_data$LABA   <- NULL
-mi$patients_data$statin <- NULL
-mi$version <- "accept3"
-mi$country <- "GBR-primary"
-model_run(mi)
+# Canada
+model_run(list(
+  patients_data = accept::samplePatients,
+  version = "accept3",
+  country = "CAN"
+))
 ```
 
-### Option 2 — Via ModelsCloud API
+### Via ModelsCloud
 
 ```r
+remotes::install_github("resplab/modelscloud")
 library(modelscloud)
-connect_to_model("resplab/acceptpexa", access_key = "YOUR_API_KEY")
+connect_to_model("resplab/acceptpexa", access_key = "YOUR_KEY")
 
 # Default — accept2
 model_run(get_default_input())
 
 # UK primary care
-mi <- get_sample_input()
-mi$version <- "accept3"
-mi$country <- "GBR-primary"
-model_run(mi)
+model_run(list(
+  patients_data = accept::samplePatients,
+  version = "accept3",
+  country = "GBR-primary"
+))
 ```
 
-### Option 3 — Via Web Interface (Raw JSON)
+---
 
+## Examples by Version
+
+> **Note:** `ID` can be any string — `"P002"`, `"10001"`, `"patient_1"`, `"ABC123"` — it is just a label
+> to identify the patient in the output. The model does not use it for any calculation; it simply
+> echoes it back in the results so you can match predictions to patients.
+
+### ACCEPT 1.0
+
+**Web interface (Lite tab):**
 ```json
 {
-  "funcName": "model_run",
-  "funcInput": {
-    "model_input": {
-      "patients_data": [
-        {
-          "ID": "10001",
-          "male": true,
-          "age": 70,
-          "smoker": true,
-          "oxygen": true,
-          "statin": true,
-          "LAMA": true,
-          "LABA": true,
-          "ICS": true,
-          "FEV1": 33,
-          "BMI": 25,
-          "SGRQ": 50,
-          "LastYrExacCount": 2,
-          "LastYrSevExacCount": 1
-        }
-      ],
-      "version": "accept3",
-      "country": "GBR-primary"
-    }
-  },
-  "ignoreDefaultInput": true
+  "model_input": {
+    "patients_data": [
+      {
+        "ID": "10001", "male": true, "age": 70, "smoker": true,
+        "oxygen": true, "statin": true, "LAMA": true, "LABA": true,
+        "ICS": true, "FEV1": 33, "BMI": 25, "SGRQ": 50,
+        "LastYrExacCount": 2, "LastYrSevExacCount": 1
+      }
+    ],
+    "version": "accept1"
+  }
 }
+```
+
+**R (modelscloud):**
+```r
+library(modelscloud)
+connect_to_model("resplab/acceptpexa", access_key = "YOUR_KEY")
+
+model_run(list(
+  patients_data = data.frame(
+    ID = "10001", male = TRUE, age = 70, smoker = TRUE, oxygen = TRUE,
+    statin = TRUE, LAMA = TRUE, LABA = TRUE, ICS = TRUE, FEV1 = 33,
+    BMI = 25, SGRQ = 50, LastYrExacCount = 2, LastYrSevExacCount = 1
+  ),
+  version = "accept1"
+))
+```
+
+---
+
+### ACCEPT 2.0
+
+**Web interface (Lite tab):**
+```json
+{
+  "model_input": {
+    "patients_data": [
+      {
+        "ID": "10001", "male": true, "age": 70, "smoker": true,
+        "oxygen": true, "statin": true, "LAMA": true, "LABA": true,
+        "ICS": true, "FEV1": 33, "BMI": 25, "SGRQ": 50,
+        "LastYrExacCount": 2, "LastYrSevExacCount": 1
+      }
+    ],
+    "version": "accept2"
+  }
+}
+```
+
+> **Note:** `"country": null` also works for accept2 — country is not used.
+
+**R (modelscloud):**
+```r
+model_run(list(
+  patients_data = data.frame(
+    ID = "10001", male = TRUE, age = 70, smoker = TRUE, oxygen = TRUE,
+    statin = TRUE, LAMA = TRUE, LABA = TRUE, ICS = TRUE, FEV1 = 33,
+    BMI = 25, SGRQ = 50, LastYrExacCount = 2, LastYrSevExacCount = 1
+  ),
+  version = "accept2"
+))
+```
+
+---
+
+### ACCEPT 3.0 — Country-specific (e.g. Germany)
+
+**Web interface (Lite tab):**
+```json
+{
+  "model_input": {
+    "patients_data": [
+      {
+        "ID": "10001", "male": true, "age": 70, "smoker": true,
+        "oxygen": false, "statin": true, "LAMA": true, "LABA": true,
+        "ICS": false, "FEV1": 33, "BMI": 25, "SGRQ": 50,
+        "LastYrExacCount": 2, "LastYrSevExacCount": 1
+      }
+    ],
+    "version": "accept3",
+    "country": "DEU"
+  }
+}
+```
+
+**R (modelscloud):**
+```r
+model_run(list(
+  patients_data = data.frame(
+    ID = "10001", male = TRUE, age = 70, smoker = TRUE, oxygen = FALSE,
+    statin = TRUE, LAMA = TRUE, LABA = TRUE, ICS = FALSE, FEV1 = 33,
+    BMI = 25, SGRQ = 50, LastYrExacCount = 2, LastYrSevExacCount = 1
+  ),
+  version = "accept3",
+  country = "DEU"
+))
+```
+
+---
+
+### ACCEPT 3.0-CPRD — UK Primary Care (two patients)
+
+**Web interface (Lite tab):**
+```json
+{
+  "model_input": {
+    "patients_data": [
+      {
+        "ID": "10001", "male": true, "age": 70, "smoker": true,
+        "oxygen": true, "LAMA": true, "ICS": true, "FEV1": 33,
+        "SGRQ": 50, "LastYrExacCount": 2, "LastYrSevExacCount": 1
+      },
+      {
+        "ID": "10002", "male": false, "age": 42, "smoker": false,
+        "oxygen": true, "LAMA": true, "ICS": false, "FEV1": 40,
+        "SGRQ": 40, "LastYrExacCount": 0, "LastYrSevExacCount": 0
+      }
+    ],
+    "version": "accept3",
+    "country": "GBR-primary"
+  }
+}
+```
+
+**R (modelscloud):**
+```r
+model_run(list(
+  patients_data = data.frame(
+    ID    = c("10001", "10002"),
+    male  = c(TRUE, FALSE),
+    age   = c(70, 42),
+    smoker = c(TRUE, FALSE),
+    oxygen = c(TRUE, TRUE),
+    LAMA  = c(TRUE, TRUE),
+    ICS   = c(TRUE, FALSE),
+    FEV1  = c(33, 40),
+    SGRQ  = c(50, 40),
+    LastYrExacCount    = c(2, 0),
+    LastYrSevExacCount = c(1, 0)
+  ),
+  version = "accept3",
+  country = "GBR-primary"
+))
+```
+
+---
+
+### ACCEPT 3.0-CPRD — Missing optional predictors (auto-imputed)
+
+Missing `statin`, `LABA`, `BMI` are automatically imputed using the CPRD model.
+
+**Web interface (Lite tab):**
+```json
+{
+  "model_input": {
+    "patients_data": [
+      {
+        "ID": "10001", "male": true, "age": 70, "smoker": true,
+        "oxygen": true, "LAMA": true, "ICS": true, "FEV1": 33,
+        "SGRQ": 50, "LastYrExacCount": 2, "LastYrSevExacCount": 1
+      }
+    ],
+    "version": "accept3",
+    "country": "GBR-primary"
+  }
+}
+```
+
+**R (modelscloud):**
+```r
+model_run(list(
+  patients_data = data.frame(
+    ID = "10001", male = TRUE, age = 70, smoker = TRUE, oxygen = TRUE,
+    LAMA = TRUE, ICS = TRUE, FEV1 = 33, SGRQ = 50,
+    LastYrExacCount = 2, LastYrSevExacCount = 1
+  ),
+  version = "accept3",
+  country = "GBR-primary"
+))
+```
+
+---
+
+### Custom patient
+
+**Web interface (Lite tab):**
+```json
+{
+  "model_input": {
+    "patients_data": [
+      {
+        "ID": "P002", "male": true, "age": 80, "smoker": true,
+        "oxygen": true, "statin": true, "LAMA": true, "LABA": true,
+        "ICS": true, "FEV1": 20, "BMI": 18, "SGRQ": 80,
+        "LastYrExacCount": 5, "LastYrSevExacCount": 3
+      }
+    ],
+    "version": "accept2"
+  }
+}
+```
+
+**R (modelscloud):**
+```r
+model_run(list(
+  patients_data = data.frame(
+    ID = "P002", male = TRUE, age = 80, smoker = TRUE, oxygen = TRUE,
+    statin = TRUE, LAMA = TRUE, LABA = TRUE, ICS = TRUE, FEV1 = 20,
+    BMI = 18, SGRQ = 80, LastYrExacCount = 5, LastYrSevExacCount = 3
+  ),
+  version = "accept2"
+))
 ```
 
 ---
@@ -153,12 +329,13 @@ It extracts `version` and `country`, passes `patients_data` to `accept::accept()
 
 ## Versions
 
-| Version | How to use | Country needed? | Missing optionals imputed? |
+| Version | `version` | `country` needed? | Missing optionals imputed? |
 |---|---|---|---|
-| ACCEPT 2.0 | `mi$version <- "accept2"` | No | No |
-| ACCEPT 3.0-CPRD | `mi$version <- "accept3"; mi$country <- "GBR-primary"` | Yes | **Yes** |
-| ACCEPT 3.0 (other) | `mi$version <- "accept3"; mi$country <- "CAN"` | Yes | No |
-| ACCEPT 1.0 | `mi$version <- "accept1"` | No | No |
+| ACCEPT 1.0 | `"accept1"` | No | No |
+| ACCEPT 2.0 | `"accept2"` | No | No |
+| ACCEPT 3.0-CPRD | `"accept3"` | Yes — `"GBR-primary"` | **Yes** |
+| ACCEPT 3.0 UK specialty | `"accept3"` | Yes — `"GBR-specialty"` | No |
+| ACCEPT 3.0 other countries | `"accept3"` | Yes — e.g. `"CAN"` | No |
 
 ### Supported countries for ACCEPT 3.0
 
@@ -205,6 +382,30 @@ derived from CPRD data. For all other versions, all predictors should be provide
 | `get_sample_input(n)` | Get sample input list with patients_data, version and country |
 | `get_default_input()` | Get default input list with one patient, version and country |
 | `echo(...)` | Echo input back — for testing API connectivity |
+
+---
+
+## References
+
+If you use this package, please cite the relevant ACCEPT paper(s):
+
+**ACCEPT 1.0**
+> Adibi A, Sin DD, Safari A, Johnson KM, Aaron SD, FitzGerald JM, Sadatsafavi M.
+> The Acute COPD Exacerbation Prediction Tool (ACCEPT): a modelling study.
+> *The Lancet Respiratory Medicine.* 2020; 8(10): 1013–1021.
+> https://doi.org/10.1016/S2213-2600(19)30397-2
+
+**ACCEPT 2.0**
+> Safari A, Adibi A, Sin DD, Lee TY, Ho JK, Sadatsafavi M and IMPACT study team.
+> ACCEPT 2.0: Recalibrating and externally validating the Acute COPD Exacerbation Prediction Tool (ACCEPT).
+> *EClinicalMedicine.* 2022; 51: 101574.
+> https://doi.org/10.1016/j.eclinm.2022.101574
+
+**ACCEPT 3.0-CPRD (UK primary care)**
+> Mehareen J, Lim LHM, Adibi A, Amegadzie JE, Xia Y, De Vera MA, Law MR, Sin DD, Bhatt SP, Quint JK, Sadatsafavi M.
+> Performance of multivariable risk prediction algorithms in predicting COPD exacerbations: a population-based study.
+> *Thorax.* 2026.
+> https://doi.org/10.1136/thorax-2026-224814
 
 ---
 
