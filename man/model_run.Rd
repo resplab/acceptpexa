@@ -7,22 +7,20 @@
 model_run(model_input = NULL)
 }
 \arguments{
-\item{model_input}{A named list containing patient data plus optional
-  \code{version} and \code{country} fields. Patient data must match the
-  format of \code{accept::samplePatients}. If NULL, uses
-  \code{get_default_input()}.
-
-  Supported fields inside \code{model_input}:
-  \itemize{
-    \item \code{version} Which version to run: "accept2" (default),
-      "accept3", "accept1". Missing optional predictors are only
-      auto-imputed when using version = "accept3" with country = "GBR-primary".
-    \item \code{country} Required when version = "accept3".
-      For UK primary care use "GBR-primary" (ACCEPT 3.0-CPRD).
-      For UK specialty care use "GBR-specialty".
-      Other supported countries: ARG, AUS, BRA, CAN, COL, DEU, DNK,
-      ESP, FRA, ITA, JPN, KOR, MEX, NLD, NOR, SWE, USA.
-  }}
+\item{model_input}{A named list with three fields:
+\itemize{
+  \item \code{patients_data} An array of patient records. Each record
+    must contain the mandatory predictors. See Mandatory Predictors below.
+  \item \code{version} Which version to run: "accept2" (default),
+    "accept3", "accept1". Missing optional predictors are only
+    auto-imputed when using version = "accept3" with country = "GBR-primary".
+  \item \code{country} Required when version = "accept3".
+    For UK primary care use "GBR-primary" (ACCEPT 3.0-CPRD).
+    For UK specialty care use "GBR-specialty".
+    Other supported countries: ARG, AUS, BRA, CAN, COL, DEU, DNK,
+    ESP, FRA, ITA, JPN, KOR, MEX, NLD, NOR, SWE, USA.
+}
+If NULL, uses the default sample patient with version = "accept2".}
 }
 \value{
 A tibble with predicted exacerbation probabilities and rates

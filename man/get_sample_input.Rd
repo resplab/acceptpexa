@@ -10,7 +10,7 @@ get_sample_input(n = NULL)
 \item{n}{Optional. Number of sample patients to return. Default returns all.}
 }
 \value{
-A data frame of sample patients in the format expected by model_run()
+A list with patients_data, version and country fields
 }
 \description{
 Get sample input for ACCEPT

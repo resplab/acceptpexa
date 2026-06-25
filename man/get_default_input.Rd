@@ -10,6 +10,6 @@ get_default_input()
 A list with one default patient plus version and country fields
 }
 \description{
-Returns a single default patient with default version and country fields
-included, ready to pass directly to model_run().
+Returns a single default patient with default version and country fields,
+ready to pass directly to model_run().
 }

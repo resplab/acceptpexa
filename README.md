@@ -11,11 +11,13 @@ derived from the Clinical Practice Research Datalink (CPRD).
 
 ### Design philosophy
 
-`model_run()` takes a **single** `model_input` argument — a named list containing both
-the patient data and any model configuration (`version`, `country`). This follows the
-ModelsCloud uniform API contract where every model on the platform looks identical to
-the client. Flexibility is achieved by adding fields to `model_input`, not by adding
-extra function arguments.
+`model_run()` takes a **single** `model_input` argument — a named list containing:
+- `patients_data` — the array of patient records
+- `version` — which ACCEPT model to run
+- `country` — country code for ACCEPT 3.0
+
+This follows the ModelsCloud uniform API contract where every model on the platform
+looks identical to the client.
 
 ---
 
@@ -50,7 +52,6 @@ mi <- get_sample_input()
 model_run(mi)
 
 # UK primary care — ACCEPT 3.0-CPRD
-# Add version and country directly to the input list
 mi <- get_sample_input()
 mi$version <- "accept3"
 mi$country <- "GBR-primary"
@@ -75,9 +76,9 @@ model_run(mi)
 
 # Missing optional predictors — auto-imputed for GBR-primary
 mi <- get_sample_input()
-mi$BMI    <- NULL
-mi$LABA   <- NULL
-mi$statin <- NULL
+mi$patients_data$BMI    <- NULL
+mi$patients_data$LABA   <- NULL
+mi$patients_data$statin <- NULL
 mi$version <- "accept3"
 mi$country <- "GBR-primary"
 model_run(mi)
@@ -89,40 +90,64 @@ model_run(mi)
 library(modelscloud)
 connect_to_model("resplab/acceptpexa", access_key = "YOUR_API_KEY")
 
-# Default input — accept2
+# Default — accept2
 model_run(get_default_input())
 
-# UK primary care — add version and country to the input
+# UK primary care
 mi <- get_sample_input()
 mi$version <- "accept3"
 mi$country <- "GBR-primary"
 model_run(mi)
+```
 
-# Canada
-mi <- get_sample_input()
-mi$version <- "accept3"
-mi$country <- "CAN"
-model_run(mi)
+### Option 3 — Via Web Interface (Raw JSON)
+
+```json
+{
+  "funcName": "model_run",
+  "funcInput": {
+    "model_input": {
+      "patients_data": [
+        {
+          "ID": "10001",
+          "male": true,
+          "age": 70,
+          "smoker": true,
+          "oxygen": true,
+          "statin": true,
+          "LAMA": true,
+          "LABA": true,
+          "ICS": true,
+          "FEV1": 33,
+          "BMI": 25,
+          "SGRQ": 50,
+          "LastYrExacCount": 2,
+          "LastYrSevExacCount": 1
+        }
+      ],
+      "version": "accept3",
+      "country": "GBR-primary"
+    }
+  },
+  "ignoreDefaultInput": true
+}
 ```
 
 ---
 
 ## How it works
 
-`model_run()` receives a single named list (`model_input`). It extracts `version` and
-`country` from the list if present, removes them, and passes the remaining patient data
-to `accept::accept()`. This means:
-
-- No extra function arguments needed
-- Works identically whether called locally or via ModelsCloud
-- Follows the ModelsCloud uniform API contract
+`model_run()` receives a single named list (`model_input`) structured as:
 
 ```r
-# Under the hood:
-# 1. Extract version and country from model_input
-# 2. Remove them from patient data
-# 3. Call accept::accept(newdata = patient_data, version = version, country = country)
+list(
+  patients_data = <data frame or list of patient records>,
+  version       = "accept3",
+  country       = "GBR-primary"
+)
 ```
+
+It extracts `version` and `country`, passes `patients_data` to `accept::accept()`.
 
 ---
 
@@ -147,11 +172,9 @@ For UK: use `"GBR-primary"` (primary care) or `"GBR-specialty"` (specialty care)
 
 | Variable | Description |
 |---|---|
-| `ID` | Unique patient identifier — required to label output rows, but not a predictor |
+| `ID` | Unique patient identifier — required to label output rows, not a predictor |
 
 ## Mandatory Predictors
-
-These columns go into the model calculation:
 
 | Variable | Description |
 |---|---|
@@ -160,7 +183,7 @@ These columns go into the model calculation:
 | `FEV1` | FEV1 % predicted (10–120) |
 | `LastYrExacCount` | Total exacerbations last year |
 | `LastYrSevExacCount` | Severe exacerbations last year |
-| `mMRC` or `SGRQ` | Symptom score — at least one required. If only SGRQ is available it is converted to mMRC internally |
+| `mMRC` or `SGRQ` | Symptom score — at least one required. SGRQ is converted to mMRC internally if mMRC is missing |
 
 ---
 
@@ -178,9 +201,9 @@ derived from CPRD data. For all other versions, all predictors should be provide
 
 | Function | Description |
 |---|---|
-| `model_run(model_input)` | Run ACCEPT predictions. Pass version/country inside model_input. |
-| `get_sample_input(n)` | Get sample patient data (optional: n patients) |
-| `get_default_input()` | Get a single default patient with default version and country |
+| `model_run(model_input)` | Run ACCEPT predictions |
+| `get_sample_input(n)` | Get sample input list with patients_data, version and country |
+| `get_default_input()` | Get default input list with one patient, version and country |
 | `echo(...)` | Echo input back — for testing API connectivity |
 
 ---

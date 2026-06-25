@@ -7,13 +7,10 @@
 
 #' Run ACCEPT prediction model
 #'
-#' @param model_input A named list containing patient data plus optional
-#'   \code{version} and \code{country} fields. Patient data must match the
-#'   format of \code{accept::samplePatients}. If NULL, uses
-#'   \code{get_default_input()}.
-#'
-#'   Supported fields inside \code{model_input}:
+#' @param model_input A named list with three fields:
 #'   \itemize{
+#'     \item \code{patients_data} An array of patient records. Each record
+#'       must contain the mandatory predictors. See Mandatory Predictors below.
 #'     \item \code{version} Which version to run: "accept2" (default),
 #'       "accept3", "accept1". Missing optional predictors are only
 #'       auto-imputed when using version = "accept3" with country = "GBR-primary".
@@ -23,21 +20,30 @@
 #'       Other supported countries: ARG, AUS, BRA, CAN, COL, DEU, DNK,
 #'       ESP, FRA, ITA, JPN, KOR, MEX, NLD, NOR, SWE, USA.
 #'   }
+#'   If NULL, uses the default sample patient with version = "accept2".
 #' @return A tibble with predicted exacerbation probabilities and rates
 #' @export
 model_run <- function(model_input = NULL) {
 
   # Use default if no input provided
   if (is.null(model_input)) {
-    model_input <- get_default_input()
+    model_input <- list(
+      patients_data = as.list(accept::samplePatients[1, ]),
+      version       = "accept2",
+      country       = NULL
+    )
   }
 
-  # Extract version and country from model_input if present
-  version <- if ("version" %in% names(model_input)) model_input[["version"]][[1]] else "accept2"
-  country <- if ("country" %in% names(model_input)) model_input[["country"]][[1]] else NULL
+  # Extract version and country
+  version <- if ("version" %in% names(model_input)) model_input[["version"]] else "accept2"
+  country <- if ("country" %in% names(model_input)) model_input[["country"]] else NULL
 
-  # Remove version and country from patient data
-  patient_data <- model_input[!names(model_input) %in% c("version", "country")]
+  # Extract patient data
+  if (!"patients_data" %in% names(model_input)) {
+    stop("'patients_data' not found in model_input. ",
+         "model_input must be a list with 'patients_data', 'version', and 'country' fields.")
+  }
+  patient_data <- model_input[["patients_data"]]
 
   # Validate version
   valid_versions <- c("accept1", "accept2", "accept3")
@@ -60,7 +66,7 @@ model_run <- function(model_input = NULL) {
   # Validate mandatory columns present
   missing_cols <- setdiff(.mandatory_vars, names(patient_data))
   if (length(missing_cols) > 0) {
-    stop(paste("Missing required columns:",
+    stop(paste("Missing required columns in patients_data:",
                paste(missing_cols, collapse = ", ")))
   }
 
@@ -74,26 +80,31 @@ model_run <- function(model_input = NULL) {
 #' Get sample input for ACCEPT
 #'
 #' @param n Optional. Number of sample patients to return. Default returns all.
-#' @return A data frame of sample patients in the format expected by model_run()
+#' @return A list with patients_data, version and country fields
 #' @export
 get_sample_input <- function(n = NULL) {
   data <- accept::samplePatients
   if (!is.null(n)) data <- data[seq_len(n), ]
-  data
+  list(
+    patients_data = data,
+    version       = "accept2",
+    country       = NULL
+  )
 }
 
 #' Get default input for ACCEPT
 #'
-#' Returns a single default patient with default version and country fields
-#' included, ready to pass directly to model_run().
+#' Returns a single default patient with default version and country fields,
+#' ready to pass directly to model_run().
 #'
 #' @return A list with one default patient plus version and country fields
 #' @export
 get_default_input <- function() {
-  patient <- as.list(accept::samplePatients[1, ])
-  patient$version <- "accept2"
-  patient$country <- NULL
-  patient
+  list(
+    patients_data = accept::samplePatients[1, ],
+    version       = "accept2",
+    country       = NULL
+  )
 }
 
 #' Echo input back for testing API connectivity and serialization
@@ -118,14 +129,14 @@ echo <- function(...) {
   if ("model_input" %in% names(args)) {
     input <- args$model_input
     return(list(
-      success   = TRUE,
-      timestamp = as.character(Sys.time()),
-      class     = class(input),
-      typeof    = typeof(input),
-      nrow      = if (is.data.frame(input)) nrow(input) else NULL,
-      ncol      = if (is.data.frame(input)) ncol(input) else NULL,
-      names     = names(input),
-      value     = input
+      success       = TRUE,
+      timestamp     = as.character(Sys.time()),
+      class         = class(input),
+      typeof        = typeof(input),
+      names         = names(input),
+      version       = if ("version"       %in% names(input)) input[["version"]]       else "not provided",
+      country       = if ("country"       %in% names(input)) input[["country"]]       else "not provided",
+      patients_data = if ("patients_data" %in% names(input)) input[["patients_data"]] else "not provided"
     ))
   }
 
