@@ -68,7 +68,7 @@ model_run(list(
 ```r
 remotes::install_github("resplab/modelscloud")
 library(modelscloud)
-connect_to_model("resplab/acceptpexa", access_key = "YOUR_KEY")
+connect_to_model("resplab/accept", access_key = "YOUR_KEY")
 
 # Default — accept2
 model_run(get_default_input())
@@ -111,7 +111,7 @@ model_run(list(
 **R (modelscloud):**
 ```r
 library(modelscloud)
-connect_to_model("resplab/acceptpexa", access_key = "YOUR_KEY")
+connect_to_model("resplab/accept", access_key = "YOUR_KEY")
 
 model_run(list(
   patients_data = data.frame(
